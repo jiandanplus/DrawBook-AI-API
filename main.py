@@ -1,5 +1,6 @@
 import uvicorn
-from api.v1.api import app, cleanup_expired_tasks  # 导入你在 api/v1/api.py 里定义的 FastAPI app
+from api.v1.api import app  # 导入你在 api/v1/api.py 里定义的 FastAPI app
+from api.v1.database import cleanup_expired_tasks  # 从database模块导入cleanup_expired_tasks函数
 import threading, time
 
 def cleanup_loop():

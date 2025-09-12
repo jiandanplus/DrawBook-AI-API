@@ -114,10 +114,10 @@ class FaceCropper:
             try:
                 # 首先尝试加载专门的人脸检测模型face_yolov8m.pt
                 try:
-                    self.yolov8_model = YOLO('face_yolov8m.pt')
-                    logger.info("成功加载专门的人脸检测模型: face_yolov8m.pt")
+                    self.yolov8_model = YOLO('models/face_yolov8m.pt')
+                    logger.info("成功加载专门的人脸检测模型: models/face_yolov8m.pt")
                 except Exception as e:
-                    logger.warning(f"无法加载专门的人脸检测模型 face_yolov8m.pt: {e}")
+                    logger.warning(f"无法加载专门的人脸检测模型 models/face_yolov8m.pt: {e}")
                     # 如果专门的人脸模型不可用，则使用通用的yolov8模型
                     try:
                         self.yolov8_model = YOLO('yolov8m.pt')

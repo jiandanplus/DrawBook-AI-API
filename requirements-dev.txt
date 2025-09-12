@@ -1,0 +1,9 @@
+# 生产环境依赖
+-r requirements.txt
+
+# 开发工具
+pytest>=6.2.0
+pytest-cov>=2.12.0
+black>=21.0.0
+flake8>=3.9.0
+mypy>=0.910
