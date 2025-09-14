@@ -3,10 +3,6 @@ fastapi==0.68.0
 uvicorn==0.15.0
 python-multipart==0.0.5
 
-# 图像处理
-Pillow==9.5.0
-opencv-python-headless==4.8.1.78
-
 # 数据库
 sqlalchemy==1.4.22
 pymysql==1.0.2
@@ -26,7 +22,6 @@ requests==2.31.0
 
 # 其他工具
 pydantic==1.10.12
-numpy==1.24.3
 tqdm==4.65.0
 
 # 异步处理
@@ -61,12 +56,8 @@ sentencepiece==0.2.0
 rich
 pandas
 scipy
-requests
 pillow
 numpy
-gradio==3.44.2
-fastapi==0.95.1
-uvicorn==0.22.0
 wandb==0.16.2
 httpx==0.24.1
 # extra
