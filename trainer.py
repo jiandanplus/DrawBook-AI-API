@@ -9,7 +9,7 @@ def main():
         "accelerate", "launch",
         "--num_cpu_threads_per_process", "1",
         "FLUX_trainer/flux_train_network.py",
-        "--pretrained_model_name_or_path=models\\flux1-dev-fp8.safetensors",
+        "--pretrained_model_name_or_path=models\\flux1-dev.safetensors",
         "--clip_l=models\\clip_l.safetensors",
         "--t5xxl=models\\t5xxl_fp16.safetensors",
         "--ae=models\\ae.safetensors",
