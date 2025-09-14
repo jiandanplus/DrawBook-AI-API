@@ -4,8 +4,8 @@ uvicorn==0.15.0
 python-multipart==0.0.5
 
 # 图像处理
-Pillow==8.3.1
-opencv-python-headless==4.9.0.80
+Pillow==9.5.0
+opencv-python-headless==4.8.1.78
 
 # 数据库
 sqlalchemy==1.4.22
@@ -16,7 +16,7 @@ oss2==2.15.0
 
 # AI相关
 zhipuai==1.0.7
-ultralytics==8.1.0
+ultralytics==8.0.0
 
 # 配置管理
 python-dotenv==0.19.0
@@ -27,7 +27,7 @@ requests==2.31.0
 # 其他工具
 pydantic==1.10.12
 numpy==1.24.3
-tqdm==4.66.1
+tqdm==4.65.0
 
 # 异步处理
 anyio==3.7.1
