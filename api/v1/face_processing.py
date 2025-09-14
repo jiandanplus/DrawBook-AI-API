@@ -12,9 +12,10 @@ from crop_face import FaceCropper
 from .oss_utils import upload_image_to_oss
 from .models import FaceResult
 
-
 logger = logging.getLogger(__name__)
 
+# 获取项目根目录路径
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ----------------- 公共工具 -----------------
 def _parse_wh_tuple(s: str, default: Tuple[int, int]) -> Tuple[int, int]:
@@ -24,12 +25,10 @@ def _parse_wh_tuple(s: str, default: Tuple[int, int]) -> Tuple[int, int]:
     except Exception:
         return default
 
-
 def _pil_to_b64(img: Image.Image) -> str:
     buf = io.BytesIO()
     img.save(buf, format="JPEG")
     return base64.b64encode(buf.getvalue()).decode("utf-8")
-
 
 def _save_img_to_static(img: Image.Image) -> str:
     file_id = str(uuid.uuid4())
@@ -37,10 +36,8 @@ def _save_img_to_static(img: Image.Image) -> str:
     img.save(save_path, format="JPEG")
     return f"/static/{file_id}.jpg"
 
-
 def save_or_encode(img: Image.Image, return_type: str):
     return _pil_to_b64(img) if return_type == "base64" else _save_img_to_static(img)
-
 
 def process_face_images(files: List, request_id: str, crop_size_tuple: Tuple[int, int], min_size_tuple: Tuple[int, int],
                        expand_ratio: float, mark_faces: bool, largest_face_only: bool, save_flipped: bool,
@@ -48,6 +45,15 @@ def process_face_images(files: List, request_id: str, crop_size_tuple: Tuple[int
     """
     处理上传的人脸图片
     """
+    # 构建模型路径
+    model_path = os.path.join(PROJECT_ROOT, "models", "face_yolov8m.pt")
+    
+    # 检查模型文件是否存在
+    if face_detector == "yolov8" and not os.path.exists(model_path):
+        logger.warning(f"YOLO模型文件不存在: {model_path}")
+        # 可以选择使用默认模型或抛出异常
+        model_path = None
+    
     cropper = FaceCropper(
         min_neighbors=8,  # 使用默认值
         scale_factor=1.3,  # 使用默认值
@@ -57,7 +63,7 @@ def process_face_images(files: List, request_id: str, crop_size_tuple: Tuple[int
         use_yolov8=(face_detector == "yolov8"),
         use_blazeface=(face_detector == "blazeface"),
         use_ultraface=(face_detector == "ultraface"),
-        strict_face_filter=strict_face_filter,
+        strict_face_filter=strict_face_filter
     )
 
     results: List[FaceResult] = []

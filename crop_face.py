@@ -9,6 +9,9 @@ import logging
 import sys
 import json
 
+# 获取项目根目录路径
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 # 添加项目根目录到sys.path，确保可以导入library模块
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -35,6 +38,24 @@ except ImportError:
 try:
     import torch
     from ultralytics import YOLO
+    # 为PyTorch 2.6+添加安全全局变量支持
+    try:
+        from ultralytics.nn.tasks import DetectionModel
+        from torch.nn.modules.container import Sequential
+        torch.serialization.add_safe_globals([DetectionModel, Sequential])
+    except Exception:
+        pass  # 如果无法导入或添加安全全局变量，则忽略
+    
+    # 保存原始的torch.load函数
+    original_torch_load = torch.load
+    
+    # 创建一个新的torch.load函数，将weights_only默认设置为False
+    def patched_torch_load(f, map_location=None, pickle_module=None, *, weights_only=True, **pickle_load_args):
+        return original_torch_load(f, map_location, pickle_module, weights_only=False, **pickle_load_args)
+    
+    # 替换torch.load函数
+    torch.load = patched_torch_load
+    
     YOLOV8_AVAILABLE = True
 except ImportError:
     YOLOV8_AVAILABLE = False
@@ -112,19 +133,13 @@ class FaceCropper:
         # 如果启用且可用，初始化YOLOv8-face检测器
         if self.use_yolov8 and YOLOV8_AVAILABLE:
             try:
-                # 首先尝试加载专门的人脸检测模型face_yolov8m.pt
-                try:
-                    self.yolov8_model = YOLO('models/face_yolov8m.pt')
-                    logger.info("成功加载专门的人脸检测模型: models/face_yolov8m.pt")
-                except Exception as e:
-                    logger.warning(f"无法加载专门的人脸检测模型 models/face_yolov8m.pt: {e}")
-                    # 如果专门的人脸模型不可用，则使用通用的yolov8模型
-                    try:
-                        self.yolov8_model = YOLO('yolov8m.pt')
-                        logger.info("成功加载通用模型: yolov8m.pt")
-                    except Exception as e2:
-                        logger.error(f"无法加载通用模型 yolov8m.pt: {e2}")
-                        raise e2
+                # 只从models文件夹加载face_yolov8m.pt模型文件
+                model_path = os.path.join(PROJECT_ROOT, 'models', 'face_yolov8m.pt')
+                # 检查模型文件是否存在
+                if not os.path.exists(model_path):
+                    raise FileNotFoundError(f"模型文件不存在: {model_path}")
+                self.yolov8_model = YOLO(model_path)
+                logger.info(f"成功加载人脸检测模型: {model_path}")
                 self.yolov8_model.conf = self.confidence_threshold
             except Exception as e:
                 logger.warning(f"无法加载YOLOv8-face模型: {e}")
