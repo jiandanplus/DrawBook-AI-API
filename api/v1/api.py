@@ -4,10 +4,12 @@ import uuid
 import time
 import json
 import logging
+import shutil
 from typing import List, Optional
 from fastapi import FastAPI, UploadFile, File, Form, APIRouter, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
+import oss2
 
 from .models import (
     FaceDetectionAlgorithm,
@@ -44,6 +46,76 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ----------------- API 路由 -----------------
 router_v1 = APIRouter(prefix="/api/v1", tags=["drawbook-ai"])
+
+# 新增接口：获取人脸处理结果并存储到本地训练目录
+@router_v1.post("/prepare_training_data", operation_id="prepare_training_data")
+async def prepare_training_data(
+    trigger: str = Form(..., description="触发器标识"),
+    get_face_request_id: str = Form(..., description="人脸处理任务的request_id")
+):
+    """
+    根据人脸处理任务ID，从OSS获取处理后的人脸图片和对应的描述文件，
+    并存储到本地train_database/{trigger}目录下
+    """
+    try:
+        # 创建本地训练目录
+        local_train_dir = f"train_database/{trigger}"
+        os.makedirs(local_train_dir, exist_ok=True)
+        
+        # 1. 获取裁剪后的人脸图片
+        corp_face_prefix = f"input_face/{get_face_request_id}/corp_face/"
+        logger.info(f"开始获取裁剪后的人脸图片，前缀: {corp_face_prefix}")
+        
+        # 遍历OSS中指定前缀的所有文件
+        corp_face_objects = []
+        for obj in oss2.ObjectIterator(bucket, prefix=corp_face_prefix):
+            if not obj.key.endswith('/'):  # 排除目录本身
+                corp_face_objects.append(obj.key)
+        
+        # 下载裁剪后的人脸图片到本地训练目录
+        for obj_key in corp_face_objects:
+            # 获取文件名
+            file_name = os.path.basename(obj_key)
+            local_file_path = os.path.join(local_train_dir, file_name)
+            
+            # 下载文件
+            bucket.get_object_to_file(obj_key, local_file_path)
+            logger.info(f"已下载裁剪人脸图片: {obj_key} -> {local_file_path}")
+        
+        # 2. 获取人脸图片对应的描述文件
+        prompt_prefix = f"input_face/{get_face_request_id}/per_face&prompt/"
+        logger.info(f"开始获取描述文件，前缀: {prompt_prefix}")
+        
+        # 遍历OSS中指定前缀的所有文件
+        prompt_objects = []
+        for obj in oss2.ObjectIterator(bucket, prefix=prompt_prefix):
+            if not obj.key.endswith('/'):  # 排除目录本身
+                prompt_objects.append(obj.key)
+        
+        # 下载描述文件到本地训练目录
+        for obj_key in prompt_objects:
+            # 获取文件名
+            file_name = os.path.basename(obj_key)
+            local_file_path = os.path.join(local_train_dir, file_name)
+            
+            # 下载文件
+            bucket.get_object_to_file(obj_key, local_file_path)
+            logger.info(f"已下载描述文件: {obj_key} -> {local_file_path}")
+        
+        # 返回成功响应
+        return {
+            "status": "success",
+            "message": f"训练数据准备完成，共下载 {len(corp_face_objects)} 张人脸图片和 {len(prompt_objects)} 个描述文件",
+            "trigger": trigger,
+            "get_face_request_id": get_face_request_id,
+            "corp_face_count": len(corp_face_objects),
+            "prompt_file_count": len(prompt_objects),
+            "local_train_dir": local_train_dir
+        }
+        
+    except Exception as e:
+        logger.error(f"准备训练数据时出错: {e}")
+        raise HTTPException(status_code=500, detail=f"准备训练数据时出错: {str(e)}")
 
 # 1) 人脸裁剪接口
 @router_v1.post(
