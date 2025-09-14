@@ -1,0 +1,17 @@
+Looking in indexes: https://mirrors.aliyun.com/pypi/simple
+Collecting Pillow==8.3.1
+  Using cached https://mirrors.aliyun.com/pypi/packages/8f/7d/1e9c2d8989c209edfd10f878da1af956059a1caab498e5bc34fa11b83f71/Pillow-8.3.1.tar.gz (48.7 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting opencv-python-headless
+  Using cached https://mirrors.aliyun.com/pypi/packages/f2/35/0858e9e71b36948eafbc5e835874b63e515179dc3b742cbe3d76bc683439/opencv_python_headless-4.12.0.88-cp37-abi3-win_amd64.whl (38.9 MB)
+Collecting numpy<2.3.0,>=2 (from opencv-python-headless)
+  Using cached https://mirrors.aliyun.com/pypi/packages/a3/dd/4b822569d6b96c39d1215dbae0582fd99954dcbcf0c1a13c61783feaca3f/numpy-2.2.6-cp310-cp310-win_amd64.whl (12.9 MB)
+Building wheels for collected packages: Pillow
+  Building wheel for Pillow (pyproject.toml): started
+  Building wheel for Pillow (pyproject.toml): finished with status 'error'
+Failed to build Pillow
