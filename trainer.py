@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import subprocess
 import sys
 import os
@@ -8,6 +7,10 @@ def main():
     cmd = [
         "accelerate", "launch",
         "--num_cpu_threads_per_process", "1",
+        "--num_processes", "1",
+        "--num_machines", "1",
+        "--mixed_precision", "fp16",
+        "--dynamo_backend", "no",
         "FLUX_trainer/flux_train_network.py",
         "--pretrained_model_name_or_path=models\\flux1-dev.safetensors",
         "--clip_l=models\\clip_l.safetensors",
@@ -16,7 +19,7 @@ def main():
         "--dataset_config=lora.toml",
         "--network_module=networks.lora_flux",
         "--sdpa",
-        "--max_train_epochs=10",
+        "--max_train_epochs=5",
         "--save_every_n_epochs=1",
         "--mixed_precision=fp16",
         "--gradient_checkpointing",
@@ -25,7 +28,9 @@ def main():
         "--model_prediction_type=raw",
         "--blocks_to_swap=18",
         "--cache_text_encoder_outputs",
-        "--cache_latents"
+        "--cache_latents",
+        "--output_dir=output",
+        "--logging_dir=logs"
     ]
     
     print("启动 FLUX LoRA 训练...")
