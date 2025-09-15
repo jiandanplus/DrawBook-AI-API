@@ -56,7 +56,6 @@ lycoris-lora==2.1.0.post3
 dadaptation==3.1
 
 # UI相关
-gradio==3.44.2
 altair==4.2.2
 easygui==0.98.3
 rich==13.7.0
