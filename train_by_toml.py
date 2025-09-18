@@ -13,7 +13,7 @@ multi_gpu = 0   # multi gpu | 多显卡训练 该参数仅限在显卡数 >= 2 �
 # ============= DO NOT MODIFY CONTENTS BELOW | 请勿修改下方内容 =====================
 
 # Set environment variables
-os.environ["HF_HOME"] = "huggingface"
+os.environ["HF_HOME"] = "./lora-scripts/huggingface"
 os.environ["PYTHONUTF8"] = "1"
 
 ext_args = []
