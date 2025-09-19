@@ -59,7 +59,7 @@ async def prepare_training_data(
     """
     try:
         # 创建本地训练目录
-        local_train_dir = f"train_database/{trigger}"
+        local_train_dir = os.path.join("train_database", f"5_{trigger}")
         os.makedirs(local_train_dir, exist_ok=True)
         
         # 1. 获取裁剪后的人脸图片

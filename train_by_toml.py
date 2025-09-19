@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 # Configuration parameters
-config_file = "./lora-scripts/config/autosave/20250918-125023.toml"  # config file | 使用 toml 文件指定训练参数
+config_file = "./lora-scripts/config/autosave/lora.toml"  # config file | 使用 toml 文件指定训练参数
 sample_prompts = "./lora-scripts/config/sample_prompts.txt"          # prompt file for sample | 采样 prompts 文件, 留空则不启用采样功能
 
 flux = 1        # train sdxl LoRA | 训练 SDXL LoRA
