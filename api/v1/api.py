@@ -5,7 +5,9 @@ import time
 import json
 import logging
 import shutil
+import re
 from typing import List, Optional
+from enum import Enum
 from fastapi import FastAPI, UploadFile, File, Form, APIRouter, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
@@ -48,15 +50,23 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 router_v1 = APIRouter(prefix="/api/v1", tags=["drawbook-ai"])
 
 # 新增接口：获取人脸处理结果并存储到本地训练目录
+class ModelType(str, Enum):
+    flux = "flux"
+    sdxl = "sdxl"
+
 @router_v1.post("/prepare_training_data", operation_id="prepare_training_data")
 async def prepare_training_data(
-    trigger: str = Form(..., description="触发器标识"),
-    get_face_request_id: str = Form(..., description="人脸处理任务的request_id")
+    trigger: str = Form(..., description="触发词标识"),
+    get_face_request_id: str = Form(..., description="人脸处理任务的request_id"),
+    model_type: ModelType = Form(ModelType.flux, description="模型类型：flux 或 sdxl")
 ):
     """
     根据人脸处理任务ID，从OSS获取处理后的人脸图片和对应的描述文件，
-    并存储到本地train_database/{trigger}目录下
+    并存储到本地train_database/{trigger}目录下；同时将train.py中的model_type设置为该值
     """
+    # 统一使用枚举值
+    model_type_value = model_type.value
+
     try:
         # 创建本地训练目录
         local_train_dir = os.path.join("train_database", f"5_{trigger}")
@@ -101,6 +111,56 @@ async def prepare_training_data(
             # 下载文件
             bucket.get_object_to_file(obj_key, local_file_path)
             logger.info(f"已下载描述文件: {obj_key} -> {local_file_path}")
+
+        # 3. 更新项目根目录下的 train.py 中的 model_type 值和模型路径（若 model_type 为 flux 则替换 pretrained_model/clip_l/t5xxl/ae；若为 sdxl 则设置相应值）
+        try:
+            train_py_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "train.py"))
+            if os.path.exists(train_py_path):
+                with open(train_py_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # 先替换 model_type
+                new_content, n_model = re.subn(
+                    r'^(model_type\s*=\s*)(["\'])(.*?)\2',
+                    rf'\1"{model_type_value}"',
+                    content,
+                    count=1,
+                    flags=re.M
+                )
+                changed = n_model > 0
+
+                # 根据 model_type 替换其他变量
+                if model_type_value == ModelType.flux.value:
+                    replacements = {
+                        r'^(pretrained_model\s*=\s*)(["\'])(.*?)\2': r'\1"./models/flux1-dev-fp8.safetensors"',
+                        r'^(clip_l\s*=\s*)(["\'])(.*?)\2': r'\1"./models/clip_l.safetensors"',
+                        r'^(t5xxl\s*=\s*)(["\'])(.*?)\2': r'\1"./models/t5xxl_fp16.safetensors"',
+                        r'^(ae\s*=\s*)(["\'])(.*?)\2': r'\1"./models/ae.safetensors"',
+                    }
+                else:  # sdxl
+                    replacements = {
+                        r'^(pretrained_model\s*=\s*)(["\'])(.*?)\2': r'\1"./models/white5v_ultra.safetensors"',
+                        r'^(clip_l\s*=\s*)(["\'])(.*?)\2': r'\1""',
+                        r'^(t5xxl\s*=\s*)(["\'])(.*?)\2': r'\1""',
+                        r'^(ae\s*=\s*)(["\'])(.*?)\2': r'\1"./models/sdxl_vae_fp16fix.safetensors"',
+                    }
+
+                for patt, repl in replacements.items():
+                    new_content, n = re.subn(patt, repl, new_content, count=1, flags=re.M)
+                    if n > 0:
+                        changed = True
+
+                if changed:
+                    with open(train_py_path, "w", encoding="utf-8") as f:
+                        f.write(new_content)
+                    logger.info(f"已将 {train_py_path} 中的 model_type/模型路径根据 model_type='{model_type_value}' 更新")
+                else:
+                    logger.warning(f"未在 {train_py_path} 中找到可替换的赋值行，未修改文件")
+            else:
+                logger.warning(f"train.py 未找到：{train_py_path}")
+        except Exception as e:
+            logger.error(f"更新 train.py 时出错: {e}")
+            raise HTTPException(status_code=500, detail=f"更新 train.py 时出错: {str(e)}")
         
         # 返回成功响应
         return {
@@ -108,11 +168,14 @@ async def prepare_training_data(
             "message": f"训练数据准备完成，共下载 {len(corp_face_objects)} 张人脸图片和 {len(prompt_objects)} 个描述文件",
             "trigger": trigger,
             "get_face_request_id": get_face_request_id,
+            "model_type": model_type_value,
             "corp_face_count": len(corp_face_objects),
             "prompt_file_count": len(prompt_objects),
             "local_train_dir": local_train_dir
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"准备训练数据时出错: {e}")
         raise HTTPException(status_code=500, detail=f"准备训练数据时出错: {str(e)}")

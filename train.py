@@ -2,10 +2,10 @@ import os
 import subprocess
 
 # ========== 配置区 ==========
-pretrained_model = "D:/AIGC/ComfyUI_JFD/ComfyUI/models/unet/flux1-dev-fp8.safetensors"
-clip_l = "D:/AIGC/ComfyUI_JFD/ComfyUI/models/clip/clip_l.safetensors"
-t5xxl = "D:/AIGC/ComfyUI_JFD/ComfyUI/models/clip/t5xxl_fp16.safetensors"
-ae = "D:/AIGC/ComfyUI_JFD/ComfyUI/models/vae/ae.safetensors"
+pretrained_model = "./models/flux1-dev-fp8.safetensors"
+clip_l = "./models/clip_l.safetensors"
+t5xxl = "./models/t5xxl_fp16.safetensors"
+ae = "./models/ae.safetensors"
 model_type = "flux"  # 可选: sd1.5, sd2.0, sdxl, flux
 parameterization = 0  # 仅sd2.0时有效
 
@@ -77,7 +77,7 @@ elif model_type == "sd2.0":
 if model_type == "flux":
     network_module = "networks.lora_flux"
 else:
-    network_module = "networks.lora"
+    network_module = "lycoris.kohya"
 
 if model_type == "sdxl":
     trainer_file = "./lora-scripts/scripts/stable/sdxl_train_network.py"
