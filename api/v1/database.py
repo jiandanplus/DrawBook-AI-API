@@ -55,8 +55,14 @@ def save_task(request_id, task_type, status, created_at, finished_at=None, durat
     db = SessionLocal()
     try:
         if results:
-            # 自动兼容 Pydantic 模型和 dict
-            results = [r.dict() if hasattr(r, "dict") else r for r in results]
+            # 修复：区分 results 是列表还是单个字典
+            if isinstance(results, list):
+                # 自动兼容 Pydantic 模型和 dict 列表
+                results = [r.dict() if hasattr(r, "dict") else r for r in results]
+            elif hasattr(results, "dict"):
+                # 如果是单个 Pydantic 模型，转换为字典
+                results = results.dict()
+        
         task = Task(
             request_id=request_id,
             type=task_type,

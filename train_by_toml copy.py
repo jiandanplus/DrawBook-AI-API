@@ -6,9 +6,9 @@ from pathlib import Path
 # Configuration parameters
 sample_prompts = "./lora-scripts/config/sample_prompts.txt"          # prompt file for sample | 采样 prompts 文件, 留空则不启用采样功能
 
-flux = 1        # train sdxl LoRA | 训练 SDXL LoRA (1 -> flux, 0 -> sdxl/lork)
+flux = 0        # train sdxl LoRA | 训练 SDXL LoRA (1 -> flux, 0 -> sdxl/lork)
 
-config_file = "./toml/flux.toml" if flux else "./toml/lork.toml"
+config_file = "./toml/lork.toml" if flux else "./toml/lork.toml"
 multi_gpu = 0   # multi gpu | 多显卡训练 该参数仅限在显卡数 >= 2 使用
 
 # ============= DO NOT MODIFY CONTENTS BELOW | 请勿修改下方内容 =====================

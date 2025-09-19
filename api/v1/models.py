@@ -90,5 +90,31 @@ class GLMBatchResponse(BaseModel):
     results: List[GLMItemResult]
 
 
+class TrainingDataResponse(BaseModel):
+    request_id: str
+    status: str
+    message: str
+    trigger: str
+    get_face_request_id: str
+    model_type: str
+    corp_face_count: int
+    prompt_file_count: int
+    local_train_dir: str
+    training_started: bool
+    training_pid: Optional[int] = None
+    log_file: Optional[str] = None
+    created_at: float
+    finished_at: float
+    duration: float
+
+
+class TrainingStatusResponse(BaseModel):
+    task_id: str
+    status: str
+    progress: float = 0.0
+    is_process_running: bool
+    log_preview: Optional[List[str]] = None
+
+
 # 更新前向引用
 # 在新版本中不需要显式调用 model_rebuild()

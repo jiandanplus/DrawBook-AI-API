@@ -2,11 +2,11 @@ import os
 import subprocess
 
 # ========== 配置区 ==========
-pretrained_model = "./models/white5v_ultra.safetensors"
-clip_l = ""
-t5xxl = ""
-ae = "./models/sdxl_vae_fp16fix.safetensors"
-model_type = "sdxl"  # 可选: sd1.5, sd2.0, sdxl, flux
+pretrained_model = "./models/flux1-dev-fp8.safetensors"
+clip_l = "./models/clip_l.safetensors"
+t5xxl = "./models/t5xxl_fp16.safetensors"
+ae = "./models/ae.safetensors"
+model_type = "flux"  # 可选: sd1.5, sd2.0, sdxl, flux
 parameterization = 0  # 仅sd2.0时有效
 
 train_data_dir = "D:/AIGC/DrawBook-AI-API/train_database/test1"

@@ -2,20 +2,20 @@ import os
 import subprocess
 
 # ========== 配置区 ==========
-pretrained_model = "./models/flux1-dev-fp8.safetensors"
-clip_l = "./models/clip_l.safetensors"
-t5xxl = "./models/t5xxl_fp16.safetensors"
-ae = "./models/ae.safetensors"
-model_type = "flux"  # 可选: sd1.5, sd2.0, sdxl, flux
+pretrained_model = "./models/white5v_ultra.safetensors"
+clip_l = ""
+t5xxl = ""
+ae = "./models/sdxl_vae_fp16fix.safetensors"
+model_type = "sdxl"  # 可选: sd1.5, sd2.0, sdxl, flux
 parameterization = 0  # 仅sd2.0时有效
 
-train_data_dir = "D:/AIGC/DrawBook-AI-API/train_database/test1"
+train_data_dir = "./train_database/test1"
 reg_data_dir = ""
 shuffle_caption = "False"  # True or False
 
 network_weights = ""
-network_dim = 32
-network_alpha = 32
+network_dim = 100000
+network_alpha = 100000
 
 resolution = "1024,1024"
 batch_size = 1
@@ -46,7 +46,7 @@ save_state = 0
 resume = ""
 
 min_bucket_reso = 512
-max_bucket_reso = 1024
+max_bucket_reso = 2048
 persistent_data_loader_workers = 1
 clip_skip = 2
 multi_gpu = 0
