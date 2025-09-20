@@ -13,7 +13,7 @@ threading.Thread(target=cleanup_loop, daemon=True).start()
 if __name__ == "__main__":
     uvicorn.run(
         "api.v1.api:app",   # 指定模块路径和 app 对象
-        host="0.0.0.0",     # 对外暴露
+        host="127.0.0.1",     # 对外暴露
         port=8000,          # 服务端口
         reload=True         # 开发时热重载
     )

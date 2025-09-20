@@ -1,0 +1,23 @@
+curl -X 'GET' \
+  'http://127.0.0.1:8000/api/v1/get_task/8369e75f-96c3-4da7-b42c-f4dcf548110a' \
+  -H 'accept: application/json'
+  	
+Response body
+{
+  "request_id": "8369e75f-96c3-4da7-b42c-f4dcf548110a",
+  "status": "success",
+  "message": "训练数据准备完成，共下载 2 张人脸图片和 2 个描述文件",
+  "trigger": "2025",
+  "get_face_request_id": "535c9405-2757-4b92-bcd9-64c7322b1f1d",
+  "model_type": "flux",
+  "corp_face_count": 2,
+  "prompt_file_count": 2,
+  "local_train_dir": "train_database\\2025\\1_2025",
+  "training_started": true,
+  "training_pid": 8228,
+  "log_file": "logs\\training\\training_2025_20250920_170224.log",
+  "created_at": 1758358944.1859112,
+  "finished_at": 1758358946.6467426,
+  "duration": 2.4608314037323
+}
+通过get_task接口可以查询到训练信息
